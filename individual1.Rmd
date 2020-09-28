@@ -9,11 +9,116 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+## Importing Packages and Dataset
+
 ```{r}
-library(readxl)
 library(tidyverse)
+library(plyr)
 library(dplyr)
 library(ggplot2)
 library(devtools)
-library(plyr)
+library(readxl)
+dat <- readxl::read_xls('~/ds202_lab3/GSS.xls')
+```
+
+## Manipulating Data Frame
+
+```{r}
+rename <- function(dat, oldnames, newnames) {
+  datnames <- colnames(dat)
+  datnames[which(datnames %in% oldnames)] <- newnames
+  colnames(dat) <- datnames
+  dat
+}
+
+dat <- rename(dat,c('Gss year for this respondent', 'Belief in life after death', 'Favor or oppose death penalty for murder', 'Political party affiliation', 'Respondents sex', 'Highest year of school completed', 'Marital status', 'Labor force status', 'Respondent id number', 'General happiness'), c('year', 'belief', 'deathPenalty', 'party', 'sex', 'education', 'married', 'workStatus', 'id', 'happiness'))
+
+head(dat)
+```
+
+## 1. Find the average years of education for the respondents with each political party affiliation. Arrange your output in a meaningful order and print. Describe any patterns you find.
+
+```{r}
+dat$id <- as.numeric(as.character(dat$id))
+dat$education <- as.numeric(as.character(dat$education))
+
+indneardem<- dat %>%
+  filter(party == "Ind,near dem" & education > 13)
+notstrdemocrat<- dat %>%
+  filter(party == "Not str democrat" & education > 12)
+strongdemocrat<- dat %>%
+  filter(party == "Strong democrat" & education > 12)
+indnearrep<- dat %>%
+  filter(party == "Ind,near rep" & education > 13)
+notstrrepublican<- dat %>%
+  filter(party == "Not str republican" & education > 13)
+strongrepublican<- dat %>%
+  filter(party == "Strong republican" & education > 13)
+otherparty<- dat %>%
+  filter(party == "Other party" & education > 13)
+independent<- dat %>%
+  filter(party == "Independent" & education > 12)
+dontknow<- dat %>%
+  filter(party == "Don't know" & education > 11)
+noanswer<- dat %>%
+  filter(party == "No answer" & education > 12)
+
+mergeCols <- c('year', 'belief', 'deathPenalty', 'party', 'sex', 'education', 'married', 'workStatus', 'id', 'happiness')
+
+MedEduByParty <- data.frame(aggregate(dat$education ~ dat$party, data=dat, median))
+
+MedEduByPartyOrdered <- MedEduByParty[order(MedEduByParty$dat.education), ]
+
+MedEduByPartyOrdered
+
+```
+
+    Those who responded "Don't know" have the lowest median education level, while those who responded "Strong republican" had the highest median education level.
+    
+## 2. Create a single data frame containing records for the better educated respondents in each political party affiliation. A “better educated” respondent is someone who has strictly more years of education than the median in the same party affiliation. Print the structure of the data frame.
+
+```{r}
+dat$education <- as.numeric(as.character(dat$education))
+
+betterEducated <- do.call("rbind", list(indneardem, notstrdemocrat, strongdemocrat, indnearrep, notstrrepublican, strongrepublican, otherparty, independent, dontknow, noanswer))
+
+head(betterEducated)
+str(betterEducated)
+```
+
+## 3. How is the happiness of a respondent related to his/her marriage status? Define that a person is happy if the response to question is “Very happy” or “Pretty happy”.
+```{r}
+happy <- dat %>%
+  filter(happiness == "Very happy" | happiness == "Pretty happy")
+
+result1 <- data.frame(aggregate(happy$happiness ~ happy$married, data=happy, FUN = function(x){NROW(x)}))
+result1
+
+ggplot(result1, aes(x=happy.married, y=happy.happiness)) + xlab('Marital Status') + ylab('Count') + ggtitle('The Effect of Marital Status on Happiness') + geom_bar(stat="identity", fill="orange")
+
+nothappy <- dat %>%
+  filter(happiness != "Very happy" & happiness != "Pretty happy")
+
+result2 <- data.frame(aggregate(nothappy$happiness ~ nothappy$married, data=nothappy, FUN = function(x){NROW(x)}))
+result2
+
+ggplot(result2, aes(x=nothappy.married, y=nothappy.happiness)) + xlab('Marital Status') + ylab('Count') + ggtitle('The Effect of Marital Status on Unhappiness') + geom_bar(stat="identity", fill="blue")
+ 
+```
+
+    A large proportion of the "happy" respondents are married, indicating marriage increases happiniess.  When we look at the "unhappy" responses, we also notice that the majority of respondents are married. However, the proportions of respondents who are divorced or never married are much higher when comopared to the "happy" plot.
+    
+## 4. Does party affiliation affect the relationship you found in the last question?
+```{r}
+
+```
+
+## 5. How is marrital status related to the education of a respondent? What are possible reasons accounting for the patterns you see?
+```{r}
+
+```
+
+## 6. Explore two more interesting questions, and answer those questions using the GSS data.
+```{r}
+
 ```
