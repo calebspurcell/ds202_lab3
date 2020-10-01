@@ -42,25 +42,25 @@ head(dat)
 dat$id <- as.numeric(as.character(dat$id))
 dat$education <- as.numeric(as.character(dat$education))
 
-indneardem<- dat %>%
+indneardem <- dat %>%
   filter(party == "Ind,near dem" & education > 13)
-notstrdemocrat<- dat %>%
+notstrdemocrat <- dat %>%
   filter(party == "Not str democrat" & education > 12)
-strongdemocrat<- dat %>%
+strongdemocrat <- dat %>%
   filter(party == "Strong democrat" & education > 12)
-indnearrep<- dat %>%
+indnearrep <- dat %>%
   filter(party == "Ind,near rep" & education > 13)
-notstrrepublican<- dat %>%
+notstrrepublican <- dat %>%
   filter(party == "Not str republican" & education > 13)
-strongrepublican<- dat %>%
+strongrepublican <- dat %>%
   filter(party == "Strong republican" & education > 13)
-otherparty<- dat %>%
+otherparty <- dat %>%
   filter(party == "Other party" & education > 13)
-independent<- dat %>%
+independent <- dat %>%
   filter(party == "Independent" & education > 12)
-dontknow<- dat %>%
+dontknow <- dat %>%
   filter(party == "Don't know" & education > 11)
-noanswer<- dat %>%
+noanswer <- dat %>%
   filter(party == "No answer" & education > 12)
 
 mergeCols <- c('year', 'belief', 'deathPenalty', 'party', 'sex', 'education', 'married', 'workStatus', 'id', 'happiness')
@@ -102,7 +102,7 @@ nothappy <- dat %>%
 result2 <- data.frame(aggregate(nothappy$happiness ~ nothappy$married, data=nothappy, FUN = function(x){NROW(x)}))
 result2
 
-ggplot(result2, aes(x=nothappy.married, y=nothappy.happiness)) + xlab('Marital Status') + ylab('Count') + ggtitle('The Effect of Marital Status on Unhappiness') + geom_bar(stat="identity", fill="blue")
+ggplot(result2, aes(x=nothappy.married, y=nothappy.happiness)) + xlab('Marital Status') + ylab('Count') + ggtitle('The Effect of Marital Status on Unhappiness') + geom_bar(stat="identity", fill='blue')
  
 ```
 
@@ -110,15 +110,34 @@ ggplot(result2, aes(x=nothappy.married, y=nothappy.happiness)) + xlab('Marital S
     
 ## 4. Does party affiliation affect the relationship you found in the last question?
 ```{r}
+partyAffil <- data.frame(aggregate(happy$married == 'Married' ~ happy$party, data=happy, FUN = function(x){NROW(x)}))
 
+partyAffil <- rename(partyAffil,c('happy.party','happy.married.....Married.'), c('party', 'married'))
+partyAffil
+
+ggplot(partyAffil, aes(x=party, y=married)) + xlab('Party Affiliation') + ylab('Count') + ggtitle('The Effect of Political Party on Happy Marriage') + geom_bar(stat='identity', fill='brown',) + coord_flip()
 ```
 
+    When we look closer at this distribution, we can see that democrats have a noticeable edge over republicans in terms of happy marriages.  When you compare each level(strong, not str, indnear) of affiliation by party, democratic affiliations tend to have more happy marriages than the corresponding republican affiliations. This distribution shows there are more happily married democrats than happily married republicans.
+    
 ## 5. How is marrital status related to the education of a respondent? What are possible reasons accounting for the patterns you see?
+```{r}
+eduLevel <- data.frame(aggregate(dat$education ~ dat$married, data=dat, median))
+eduLevel
+
+ggplot(dat, aes(x=married, y=education)) + xlab('Marital Status') + ylab('Education Level') + ggtitle('The Effect of Marital Status on Education Level') + geom_boxplot()
+```
+
+    Marital status doesn't appear to have a large effect on the education level of a respondent, as the median education levels are fairly close together.  However, we can see that people who did not provide their marital status had the highest median education level of 16.  One possible reason this category has a higher median education level is that there aren't many people in this category.  Since there are no outliers for this category and the range is small, we can assume less people are in this category.  A small group of people has less variation, which ultimately results in a higher median education level.
+    
+## 6. Explore two more interesting questions, and answer those questions using the GSS data.
+
+# Q1: 
 ```{r}
 
 ```
 
-## 6. Explore two more interesting questions, and answer those questions using the GSS data.
+# Q2: 
 ```{r}
 
 ```
