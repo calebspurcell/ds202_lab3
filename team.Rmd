@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Importing Packages and Dataset
+## Importing Packages and Dataset (Please Excuse Warning Messages)
 
 ```{r}
 library(tidyverse)
@@ -122,8 +122,8 @@ ggplot(partyAffil, aes(x=party, y=married)) + xlab('Party Affiliation') + ylab('
     
 ## 5. How is marrital status related to the education of a respondent? What are possible reasons accounting for the patterns you see?
 ```{r}
-eduLevel <- data.frame(aggregate(dat$education ~ dat$married, data=dat, median))
-eduLevel
+marritalEdu <- data.frame(aggregate(dat$education ~ dat$married, data=dat, median))
+marritalEdu
 
 ggplot(dat, aes(x=married, y=education)) + xlab('Marital Status') + ylab('Education Level') + ggtitle('The Effect of Marital Status on Education Level') + geom_boxplot()
 ```
@@ -132,12 +132,32 @@ ggplot(dat, aes(x=married, y=education)) + xlab('Marital Status') + ylab('Educat
     
 ## 6. Explore two more interesting questions, and answer those questions using the GSS data.
 
-# Q1: 
+# Q1: How is work status related to the happiness of a respondent?
 ```{r}
+happy <- dat %>%
+  filter(happiness == "Very happy" | happiness == "Pretty happy")
 
+result3 <- data.frame(aggregate(happy$happiness ~ happy$workStatus, data=happy, FUN = function(x){NROW(x)}))
+result3
+
+ggplot(result3, aes(x=happy.workStatus, y=happy.happiness)) + xlab('Work Status') + ylab('Count') + ggtitle('The Effect of Work Status on Happiness') + geom_bar(stat="identity", fill="gold") + coord_flip()
+
+nothappy <- dat %>%
+  filter(happiness != "Very happy" & happiness != "Pretty happy")
+
+result4 <- data.frame(aggregate(nothappy$happiness ~ nothappy$workStatus, data=nothappy, FUN = function(x){NROW(x)}))
+result4
+
+ggplot(result4, aes(x=nothappy.workStatus, y=nothappy.happiness)) + xlab('Work Status') + ylab('Count') + ggtitle('The Effect of Work Status on Unhappiness') + geom_bar(stat="identity", fill='purple') + coord_flip()
 ```
 
-# Q2: 
+    A large proportion of the "happy" respondents are working full time. Most of the "unhappy" respondents are also working full time.  However, the proportions of respondents who are unemployed, laid off or retired are much higher when comopared to the "happy" plot.  Possible reasons why these work statuses are not as happy include econmomic insecurity and lonliness.
+    
+# Q2: How is education level related to work status?
 ```{r}
+eduWork <- data.frame(aggregate(dat$workStatus ~ dat$education, data=dat, FUN = function(x){NROW(x)}))
 
+ggplot(dat, aes(x=education, y=workStatus)) + xlab('Education Level') + ylab('Work Status') + ggtitle('The Effect of Education on Work Status') + geom_boxplot()
 ```
+
+    This plot shows the distribution of education level for each work status.  By looking at these boxplots we can see that the "No answer" category again has the highest median education level.  Just like in question 5, there probably aren't many people in this group, which is why the distribution is not normal.  Excluding the "No answer" category, we can see the next highest median education level is 14 for "School."  This makes sense because these people are pursuing a higher education degree.  The lowest IQRs for education level belong to the "Keeping house" and "Other" work statuses.
